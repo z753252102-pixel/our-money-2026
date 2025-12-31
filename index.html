@@ -3,114 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🍭 2026 明與萱的馬卡龍金庫</title>
+    <title>🍭 2026 明與萱的時光金庫</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+        
         :root {
-            --macaron-pink: #FFB7B2; --macaron-yellow: #FFDAC1; --macaron-green: #E2F0CB;
-            --macaron-blue: #B5EAD7; --macaron-purple: #C7CEEA;
+            /* 白天模式變數 */
             --bg-gradient: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%);
             --card-bg: rgba(255, 255, 255, 0.9);
+            --text-color: #555;
+            --jar-glass: rgba(255, 255, 255, 0.4);
         }
+
+        /* 晚上模式樣式 */
+        body.night-mode {
+            --bg-gradient: linear-gradient(120deg, #2c3e50 0%, #000000 100%);
+            --card-bg: rgba(30, 30, 50, 0.85);
+            --text-color: #eee;
+            --jar-glass: rgba(100, 100, 200, 0.2);
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Nunito', sans-serif; background-image: var(--bg-gradient); background-attachment: fixed; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; color: #555; overflow-x: hidden; }
-        .container { width: 100%; max-width: 600px; background: var(--card-bg); border-radius: 30px; padding: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); backdrop-filter: blur(10px); border: 4px solid #fff; position: relative; z-index: 10; }
         
-        header { text-align: center; margin-bottom: 15px; }
-        h1 { color: #6e45e2; font-size: 1.5rem; margin: 0; text-shadow: 1px 1px 0 white; }
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-image: var(--bg-gradient); 
+            background-attachment: fixed; 
+            margin: 0; padding: 10px; 
+            display: flex; justify-content: center; min-height: 100vh; 
+            color: var(--text-color); 
+            transition: all 1s ease;
+        }
+
+        .container { width: 100%; max-width: 600px; background: var(--card-bg); border-radius: 30px; padding: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.3); position: relative; }
+
+        header h1 { font-size: 1.5rem; text-align: center; margin: 0; color: #6e45e2; }
+        body.night-mode header h1 { color: #a18cd1; }
+
         .user-switcher { display: flex; justify-content: center; gap: 8px; margin: 15px 0; }
-        .user-btn { padding: 8px 20px; border-radius: 50px; border: 2px solid #6e45e2; background: white; color: #6e45e2; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .user-btn { padding: 8px 20px; border-radius: 50px; border: 2px solid #6e45e2; background: white; color: #6e45e2; font-weight: 800; cursor: pointer; }
         .user-btn.active { background: #6e45e2; color: white; }
-        .sync-status { font-size: 0.75rem; color: #888; margin-top: 5px; font-weight: bold; }
+        body.night-mode .user-btn { background: #1a1a2e; color: #a18cd1; border-color: #a18cd1; }
+        body.night-mode .user-btn.active { background: #a18cd1; color: #1a1a2e; }
+
+        /* 視覺化存錢罐 */
+        .jar-container { display: flex; justify-content: center; margin: 20px 0; position: relative; }
+        .jar {
+            width: 100px; height: 140px;
+            background: var(--jar-glass);
+            border: 3px solid #fff;
+            border-radius: 20px 20px 40px 40px;
+            position: relative; overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.5);
+        }
+        .jar-lid {
+            width: 60px; height: 12px;
+            background: #ffb7b2;
+            position: absolute; top: -10px; left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px; z-index: 5;
+        }
+        .water {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(0deg, #FFB7B2 0%, #C7CEEA 100%);
+            transition: height 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; color: white; font-weight: 800;
+        }
 
         .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-box { text-align: center; padding: 12px; border-radius: 20px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
-        .stat-box:active { transform: scale(0.95); }
-        .full-width { grid-column: span 2; background: linear-gradient(135deg, #fff 0%, #fff0f5 100%); border: 2px solid #ffb7b2; }
-        .stat-label { font-size: 0.75rem; font-weight: 700; opacity: 0.8; margin-bottom: 3px; }
-        .stat-value { font-size: 1.2rem; font-weight: 800; color: #444; }
-        .highlight { color: #e83e8c; }
+        .stat-box { text-align: center; padding: 12px; border-radius: 20px; background: rgba(255,255,255,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; }
+        body.night-mode .stat-box { background: rgba(255,255,255,0.1); }
+        .full-width { grid-column: span 2; border: 2px dashed #ffb7b2; }
 
-        .progress-section { margin: 15px 0; font-size: 0.8rem; font-weight: 700; }
-        .progress-info { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .progress-container { width: 100%; background: #eee; border-radius: 50px; height: 12px; overflow: hidden; border: 1px solid #ddd; }
-        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ff9a9e, #fad0c4); transition: width 0.8s ease; }
-        .bar-2026 { background: linear-gradient(90deg, #a18cd1, #fbc2eb); }
-
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 8px; margin-top: 15px; }
-        .day-box { aspect-ratio: 1; border-radius: 50%; border: 2px solid #eee; display: flex; align-items: center; justify-content: center; font-weight: 800; cursor: pointer; transition: 0.2s; background: #fff; font-size: 0.75rem; color: #aaa; }
-        .day-box.active { color: #fff; border-color: transparent; transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .day-box.active:nth-child(5n+1) { background-color: var(--macaron-pink); }
-        .day-box.active:nth-child(5n+2) { background-color: var(--macaron-yellow); }
-        .day-box.active:nth-child(5n+3) { background-color: var(--macaron-green); }
-        .day-box.active:nth-child(5n+4) { background-color: var(--macaron-blue); }
-        .day-box.active:nth-child(5n+5) { background-color: var(--macaron-purple); }
-
-        /* 悄悄話區塊 */
-        .message-section { margin-top: 20px; padding: 15px; background: #fff5f8; border-radius: 20px; border: 2px dashed #ffb7b2; }
-        .message-title { font-size: 0.85rem; font-weight: 800; color: #ff6b6b; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; justify-content: center; }
-        #message-input { width: 100%; border: 1px solid #ffcad4; border-radius: 12px; padding: 10px; font-family: inherit; font-size: 0.9rem; resize: none; outline: none; transition: 0.3s; }
-        #message-input:focus { border-color: #ff6b6b; box-shadow: 0 0 8px rgba(255,107,107,0.2); }
-        .save-msg-btn { margin-top: 8px; background: #ffb7b2; border: none; padding: 8px 20px; border-radius: 50px; color: white; font-weight: 800; cursor: pointer; width: 100%; transition: 0.3s; }
-        .save-msg-btn:active { transform: scale(0.95); background: #ff9a9e; }
-
-        /* 愛心特效樣式 */
-        .heart { position: fixed; font-size: 20px; pointer-events: none; z-index: 999; animation: fly 1s ease-out forwards; }
-        @keyframes fly {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--xdiff), var(--ydiff)) scale(1.5); opacity: 0; }
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 8px; }
+        .day-box { aspect-ratio: 1; border-radius: 50%; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; font-weight: 800; cursor: pointer; background: #fff; font-size: 0.75rem; color: #aaa; }
+        body.night-mode .day-box { background: #2c3e50; border-color: #444; color: #666; }
+        .day-box.active { color: #fff; border-color: transparent; transform: scale(1.1); box-shadow: 0 0 15px rgba(255,183,178,0.5); }
         
-        .streak-fire { display: inline-block; animation: wobble 1s infinite; }
-        @keyframes wobble {
-            0%, 100% { transform: rotate(-5deg); }
-            50% { transform: rotate(5deg); }
-        }
+        /* 悄悄話 */
+        .message-section { margin-top: 20px; padding: 15px; background: rgba(255,183,178,0.1); border-radius: 20px; border: 1px solid #ffb7b2; }
+        #message-input { width: 100%; border-radius: 10px; padding: 10px; border: none; outline: none; background: rgba(255,255,255,0.5); font-family: inherit; }
+
+        /* 愛心特效 */
+        .heart { position: fixed; font-size: 20px; pointer-events: none; z-index: 999; animation: fly 1s ease-out forwards; }
+        @keyframes fly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--xdiff), var(--ydiff)) scale(1.5); opacity: 0; } }
     </style>
 </head>
-<body>
+<body id="body-tag">
 
 <div class="container">
     <header>
-        <h1 id="title">🍭 明與萱的馬卡龍金庫</h1>
+        <h1 id="title">🍭 時光金庫</h1>
         <div class="user-switcher">
             <button class="user-btn" id="btnA" onclick="switchUser('A')">明的進度</button>
             <button class="user-btn" id="btnB" onclick="switchUser('B')">萱的進度</button>
         </div>
-        <div class="sync-status" id="sync-info">⏳ 同步中...</div>
+        <div class="sync-status" id="sync-info" style="text-align: center; font-size: 0.7rem; color: #888;">⏳ 同步中...</div>
     </header>
+
+    <div class="jar-container">
+        <div class="jar">
+            <div class="jar-lid"></div>
+            <div class="water" id="jar-water" style="height: 0%;">0%</div>
+        </div>
+    </div>
 
     <div class="dashboard">
         <div class="stat-box full-width" onclick="toggleCombined()">
-            <div class="stat-label">🤝 合體金庫總額 <span id="eye-combined">🙈</span></div>
-            <div class="stat-value highlight" id="total-combined">******</div>
+            <div class="stat-label">🤝 我們的馬卡龍金庫 <span id="eye-combined">🙈</span></div>
+            <div class="stat-value" id="total-combined">******</div>
         </div>
         <div class="stat-box" onclick="toggleAmount()">
-            <div class="stat-label">🧁 我的金額 <span id="eye-icon">🙈</span></div>
+            <div class="stat-label">🧁 我的累積 <span id="eye-icon">🙈</span></div>
             <div class="stat-value" id="current-total">******</div>
         </div>
         <div class="stat-box">
             <div class="stat-label">🔥 連續存錢</div>
-            <div class="stat-value"><span class="streak-fire">🔥</span> <span id="streak-days">0</span> 天</div>
+            <div class="stat-value"><span id="streak-days">0</span> 天</div>
         </div>
-    </div>
-
-    <div class="progress-section">
-        <div class="progress-info"><span>📅 2026 年進度</span><span id="year-percent">0%</span></div>
-        <div class="progress-container"><div class="progress-bar bar-2026" id="year-progress"></div></div>
-    </div>
-
-    <div class="progress-section">
-        <div class="progress-info"><span id="user-progress-label">我的存錢進度</span><span id="percent-complete">0%</span></div>
-        <div class="progress-container"><div class="progress-bar" id="user-progress"></div></div>
     </div>
 
     <div class="grid" id="grid-container"></div>
 
     <div class="message-section">
-        <div class="message-title">💌 給對方的悄悄話</div>
-        <textarea id="message-input" rows="2" placeholder="寫點什麼鼓勵對方吧..."></textarea>
-        <button class="save-msg-btn" onclick="saveMessage()">傳送這份心意 ✨</button>
+        <div class="message-title" style="text-align:center; font-weight:800; font-size:0.8rem; margin-bottom:10px;">💌 悄悄話</div>
+        <textarea id="message-input" rows="2" placeholder="寫給對方的訊息..."></textarea>
+        <button onclick="saveMessage()" style="width:100%; margin-top:8px; background:#ffb7b2; border:none; border-radius:50px; padding:8px; color:white; font-weight:800; cursor:pointer;">傳送</button>
     </div>
 </div>
 
@@ -118,34 +137,33 @@
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxact7LMnkFfpvs6S9KUjmo1oZ9QcoI6QK4XcHORd4CTperkdmJi_aLQe9qDCnDnIw/exec';
 
     let currentUser = 'A';
-    let myData = []; 
-    let otherData = [];
-    let isAmountHidden = true;
-    let isCombinedHidden = true;
-    const totalDays = 365;
-    const grandTotal = (totalDays * (totalDays + 1)) / 2;
+    let myData = [], otherData = [];
+    let isAmountHidden = true, isCombinedHidden = true;
 
     async function init() {
         const params = new URLSearchParams(window.location.search);
         if (params.get('user') === 'B') currentUser = 'B';
+        
+        checkTime();
         updateUserUI();
-        updateYearProgress();
-        
-        const cache = localStorage.getItem(`money_2026_${currentUser}`);
-        if (cache) { myData = JSON.parse(cache); renderGrid(); updateStats(); }
-        
         await fetchCloud();
+    }
+
+    // 晝夜檢查系統
+    function checkTime() {
+        const hour = new Date().getHours();
+        const isNight = hour >= 18 || hour < 6;
+        if (isNight) document.getElementById('body-tag').classList.add('night-mode');
     }
 
     function updateUserUI() {
         document.getElementById('btnA').classList.toggle('active', currentUser === 'A');
         document.getElementById('btnB').classList.toggle('active', currentUser === 'B');
-        document.getElementById('title').textContent = `🍭 ${currentUser === 'A' ? '明' : '萱'}的馬卡龍金庫`;
-        document.getElementById('user-progress-label').textContent = `${currentUser === 'A' ? '明' : '萱'}的存錢進度`;
+        document.getElementById('title').textContent = `🍭 ${currentUser === 'A' ? '明' : '萱'}的時光金庫`;
     }
 
     async function fetchCloud() {
-        document.getElementById('sync-info').textContent = "⏳ 同步中...";
+        document.getElementById('sync-info').textContent = "⏳ 正在同步雲端...";
         try {
             const resA = await fetch(`${GOOGLE_SCRIPT_URL}?user=A`);
             const dataA = await resA.json();
@@ -156,67 +174,32 @@
 
             myData = (currentUser === 'A') ? dataA : dataB;
             otherData = (currentUser === 'A') ? dataB : dataA;
-            
-            if (msgData && msgData.text) {
-                document.getElementById('message-input').value = msgData.text;
-            }
+            if (msgData && msgData.text) document.getElementById('message-input').value = msgData.text;
 
             renderGrid();
             updateStats();
-            document.getElementById('sync-info').textContent = "✅ 已同步 " + new Date().toLocaleTimeString();
+            document.getElementById('sync-info').textContent = "✅ 已更新於 " + new Date().toLocaleTimeString();
         } catch (e) {
-            document.getElementById('sync-info').textContent = "⚠️ 離線模式";
+            document.getElementById('sync-info').textContent = "⚠️ 離線中";
         }
-    }
-
-    async function switchUser(user) {
-        if (currentUser === user) return;
-        currentUser = user;
-        updateUserUI();
-        await fetchCloud();
-    }
-
-    async function saveData() {
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST', mode: 'no-cors',
-                body: JSON.stringify({ user: currentUser, savedData: myData })
-            });
-        } catch (e) {}
-    }
-
-    async function saveMessage() {
-        const msg = document.getElementById('message-input').value;
-        document.getElementById('sync-info').textContent = "☁️ 傳送中...";
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST', mode: 'no-cors',
-                body: JSON.stringify({ user: 'MSG', savedData: { text: msg } })
-            });
-            document.getElementById('sync-info').textContent = "✅ 悄悄話已送達";
-        } catch (e) { alert("連線失敗"); }
     }
 
     function createHeart(e) {
-        const colors = ['#ff9a9e', '#fad0c4', '#ffb7b2', '#fbc2eb', '#a18cd1'];
-        for(let i=0; i<6; i++) {
-            const heart = document.createElement('div');
-            heart.className = 'heart';
-            heart.innerHTML = '❤️';
-            heart.style.left = (e.clientX || e.touches[0].clientX) + 'px';
-            heart.style.top = (e.clientY || e.touches[0].clientY) + 'px';
-            heart.style.color = colors[Math.floor(Math.random() * colors.length)];
-            heart.style.setProperty('--xdiff', (Math.random() * 200 - 100) + 'px');
-            heart.style.setProperty('--ydiff', (Math.random() * -200 - 50) + 'px');
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 1000);
-        }
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.innerHTML = '❤️';
+        heart.style.left = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) + 'px';
+        heart.style.top = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) + 'px';
+        heart.style.setProperty('--xdiff', (Math.random() * 200 - 100) + 'px');
+        heart.style.setProperty('--ydiff', (Math.random() * -200 - 50) + 'px');
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1000);
     }
 
     function renderGrid() {
         const container = document.getElementById('grid-container');
         container.innerHTML = '';
-        for (let i = 1; i <= totalDays; i++) {
+        for (let i = 1; i <= 365; i++) {
             const cell = document.createElement('div');
             cell.className = 'day-box' + (myData.includes(i) ? ' active' : '');
             cell.textContent = i;
@@ -224,7 +207,7 @@
                 createHeart(e);
                 if (myData.includes(i)) myData = myData.filter(d => d !== i);
                 else myData.push(i);
-                renderGrid(); updateStats(); saveData();
+                renderGrid(); updateStats(); saveToCloud();
             };
             container.appendChild(cell);
         }
@@ -232,34 +215,40 @@
 
     function updateStats() {
         const mySum = myData.reduce((a, b) => a + b, 0);
-        const otherSum = otherData.reduce((a, b) => a + b, 0);
-        const combined = mySum + otherSum;
-        const percent = ((mySum / grandTotal) * 100).toFixed(1);
+        const totalSum = mySum + otherData.reduce((a, b) => a + b, 0);
+        const grandTotal = (365 * 366) / 2;
+        const totalPercent = ((totalSum / (grandTotal * 2)) * 100).toFixed(1);
 
-        document.getElementById('total-combined').textContent = isCombinedHidden ? "******" : `$${combined.toLocaleString()}`;
-        document.getElementById('eye-combined').textContent = isCombinedHidden ? "🙈" : "👁️";
-        
         document.getElementById('current-total').textContent = isAmountHidden ? "******" : `$${mySum.toLocaleString()}`;
-        document.getElementById('eye-icon').textContent = isAmountHidden ? "🙈" : "👁️";
-        
-        document.getElementById('percent-complete').textContent = `${percent}%`;
-        document.getElementById('user-progress').style.width = `${percent}%`;
+        document.getElementById('total-combined').textContent = isCombinedHidden ? "******" : `$${totalSum.toLocaleString()}`;
         document.getElementById('streak-days').textContent = myData.length;
+        
+        // 更新存錢罐水位
+        const jarWater = document.getElementById('jar-water');
+        jarWater.style.height = `${totalPercent}%`;
+        jarWater.textContent = `${totalPercent}%`;
+    }
+
+    async function saveToCloud() {
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST', mode: 'no-cors',
+            body: JSON.stringify({ user: currentUser, savedData: myData })
+        });
+    }
+
+    async function saveMessage() {
+        const msg = document.getElementById('message-input').value;
+        document.getElementById('sync-info').textContent = "☁️ 傳送中...";
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST', mode: 'no-cors',
+            body: JSON.stringify({ user: 'MSG', savedData: { text: msg } })
+        });
+        document.getElementById('sync-info').textContent = "💌 悄悄話已送達";
     }
 
     function toggleAmount() { isAmountHidden = !isAmountHidden; updateStats(); }
     function toggleCombined() { isCombinedHidden = !isCombinedHidden; updateStats(); }
-
-    function updateYearProgress() {
-        const now = new Date();
-        const start = new Date(2026, 0, 1);
-        const end = new Date(2027, 0, 1);
-        let progress = ((now - start) / (end - start) * 100).toFixed(1);
-        if (progress < 0) progress = 0;
-        if (progress > 100) progress = 100;
-        document.getElementById('year-percent').textContent = `${progress}%`;
-        document.getElementById('year-progress').style.width = `${progress}%`;
-    }
+    async function switchUser(user) { currentUser = user; updateUserUI(); await fetchCloud(); }
 
     init();
 </script>
