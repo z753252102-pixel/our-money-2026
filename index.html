@@ -52,7 +52,7 @@
             transition: 0.3s;
         }
         .user-btn.active { background: #845EC2; color: white; }
-        .user-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .user-btn:disabled { opacity: 0.6; }
         
         .sync-status { font-size: 0.8rem; color: #666; margin-top: 8px; font-weight: bold; min-height: 1.2em; }
 
@@ -60,7 +60,7 @@
         .stat-box {
             flex: 1 1 calc(33.33% - 10px);
             text-align: center; padding: 15px; border-radius: 20px;
-            min-height: 110px; display: flex; flex-direction: column; justify-content: center;
+            min-height: 115px; display: flex; flex-direction: column; justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             position: relative;
         }
@@ -96,7 +96,7 @@
             font-weight: 800; cursor: pointer; transition: 0.2s;
             background: #fff; font-size: 0.85rem; color: #888;
         }
-        .day-box.active { color: #fff; border-color: transparent; transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .day-box.active { color: #fff; border-color: transparent; transform: scale(1.05); }
         .day-box.active:nth-child(5n+1) { background-color: var(--macaron-pink); }
         .day-box.active:nth-child(5n+2) { background-color: var(--macaron-yellow); }
         .day-box.active:nth-child(5n+3) { background-color: var(--macaron-green); }
@@ -107,11 +107,7 @@
         .btn-reset {
             background: #fff; border: 2px solid #FF9AA2; color: #FF9AA2;
             padding: 10px 30px; border-radius: 50px; font-weight: 700; cursor: pointer;
-            transition: 0.3s;
         }
-        .btn-reset:hover { background: #FF9AA2; color: #fff; }
-        
-        .eye-icon { font-size: 0.8rem; vertical-align: middle; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -123,12 +119,12 @@
             <button class="user-btn active" id="btnA" onclick="switchUser('A')">明的進度</button>
             <button class="user-btn" id="btnB" onclick="switchUser('B')">萱的進度</button>
         </div>
-        <div class="sync-status" id="sync-info">⏳ 初始化中...</div>
+        <div class="sync-status" id="sync-info">⏳ 準備中...</div>
     </header>
 
     <div class="dashboard">
         <div class="stat-box" onclick="toggleAmount()">
-            <div class="stat-label">🧁 累積金額 <span class="eye-icon" id="eye-icon">🙈</span></div>
+            <div class="stat-label">🧁 累積金額 <span id="eye-icon">🙈</span></div>
             <div class="stat-value" id="current-total">******</div>
         </div>
         <div class="stat-box">
@@ -159,7 +155,7 @@
     let currentUser = 'A'; 
     let savedData = [];
     let isAmountHidden = true;
-    let isSyncing = false; // 防止重複點擊同步
+    let isSyncing = false;
     const totalDays = 365;
     const grandTotal = (totalDays * (totalDays + 1)) / 2;
     const daysInMonth2026 = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -167,18 +163,15 @@
     async function init() {
         const params = new URLSearchParams(window.location.search);
         if (params.get('user') === 'B') currentUser = 'B';
-        
         updateUserUI();
         
-        // 優先顯示本地快取
+        // 優先讀取本地
         const localCache = localStorage.getItem(`money_2026_${currentUser}`);
         if (localCache) {
             savedData = JSON.parse(localCache);
             renderGrid();
             updateStats();
         }
-        
-        // 啟動即與雲端對齊
         await fetchCloud();
     }
 
@@ -190,66 +183,54 @@
 
     async function switchUser(user) {
         if (currentUser === user || isSyncing) return;
-        
         currentUser = user;
         updateUserUI();
         
-        // 1. 切換時先顯示本地資料，讓畫面反應快
+        // 切換瞬間先讀本地快照
         const localCache = localStorage.getItem(`money_2026_${currentUser}`);
         savedData = localCache ? JSON.parse(localCache) : [];
         renderGrid();
         updateStats();
         
-        // 2. 自動啟動雲端同步
+        // 立即觸發雲端同步
         await fetchCloud();
     }
 
     async function fetchCloud() {
-        if (isSyncing) return;
         isSyncing = true;
-        
         const syncEl = document.getElementById('sync-info');
-        syncEl.textContent = `⏳ 正在抓取 ${currentUser === 'A' ? '明' : '萱'} 的最新進度...`;
-        
-        // 禁用按鈕防止連續點擊造成資料混亂
-        document.getElementById('btnA').disabled = true;
-        document.getElementById('btnB').disabled = true;
+        const name = currentUser === 'A' ? '明' : '萱';
+        syncEl.textContent = `⏳ 正在同步 ${name} 的進度...`;
 
         try {
             const response = await fetch(`${GOOGLE_SCRIPT_URL}?user=${currentUser}`);
             const cloudData = await response.json();
-            
             if (Array.isArray(cloudData)) {
                 savedData = cloudData;
                 localStorage.setItem(`money_2026_${currentUser}`, JSON.stringify(savedData));
                 renderGrid();
                 updateStats();
-                syncEl.textContent = "✅ 雲端已同步 " + new Date().toLocaleTimeString();
+                syncEl.textContent = `✅ ${name} 的進度已同步於 ` + new Date().toLocaleTimeString();
             }
         } catch (e) {
-            syncEl.textContent = "⚠️ 雲端連線失敗，顯示離線資料";
+            syncEl.textContent = "⚠️ 連線不穩，已載入最後紀錄";
         } finally {
             isSyncing = false;
-            document.getElementById('btnA').disabled = false;
-            document.getElementById('btnB').disabled = false;
         }
     }
 
     async function saveData() {
         localStorage.setItem(`money_2026_${currentUser}`, JSON.stringify(savedData));
-        const syncEl = document.getElementById('sync-info');
-        
+        document.getElementById('sync-info').textContent = "☁️ 雲端同步中...";
         try {
-            syncEl.textContent = "☁️ 儲存至雲端中...";
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user: currentUser, savedData: savedData })
             });
-            syncEl.textContent = "✅ 已自動存檔";
+            document.getElementById('sync-info').textContent = "✅ 已自動存檔";
         } catch (e) {
-            syncEl.textContent = "❌ 存檔失敗";
+            document.getElementById('sync-info').textContent = "❌ 暫時無法存至雲端";
         }
     }
 
@@ -287,16 +268,8 @@
         const count = savedData.length;
         const percent = ((sum / grandTotal) * 100).toFixed(1);
 
-        const totalEl = document.getElementById('current-total');
-        const eyeEl = document.getElementById('eye-icon');
-        if (isAmountHidden) {
-            totalEl.textContent = "******";
-            eyeEl.textContent = "🙈";
-        } else {
-            totalEl.textContent = `$${sum.toLocaleString()}`;
-            eyeEl.textContent = "👁️";
-        }
-
+        document.getElementById('current-total').textContent = isAmountHidden ? "******" : `$${sum.toLocaleString()}`;
+        document.getElementById('eye-icon').textContent = isAmountHidden ? "🙈" : "👁️";
         document.getElementById('days-completed').textContent = count;
         document.getElementById('percent-complete').textContent = `${percent}%`;
         document.getElementById('progress-bar').style.width = `${percent}%`;
@@ -304,26 +277,16 @@
         let tempDays = count;
         let months = 0;
         let days = 0;
-
         for (let i = 0; i < daysInMonth2026.length; i++) {
-            if (tempDays >= daysInMonth2026[i]) {
-                tempDays -= daysInMonth2026[i];
-                months++;
-            } else {
-                days = tempDays;
-                break;
-            }
+            if (tempDays >= daysInMonth2026[i]) { tempDays -= daysInMonth2026[i]; months++; }
+            else { days = tempDays; break; }
         }
         document.getElementById('calendar-text').textContent = `約 ${months} 個月又 ${days} 天`;
     }
 
     async function resetData() {
-        const userName = currentUser === 'A' ? '明' : '萱';
-        if (confirm(`確定要清空「${userName}」的進度嗎？`)) {
-            savedData = [];
-            renderGrid();
-            updateStats();
-            await saveData();
+        if (confirm(`確定要清空「${currentUser === 'A' ? '明' : '萱'}」的進度嗎？`)) {
+            savedData = []; renderGrid(); updateStats(); await saveData();
         }
     }
 
@@ -331,6 +294,3 @@
 </script>
 </body>
 </html>
-</body>
-</html>
-
