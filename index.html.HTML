@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🍭 2026 雙人馬卡龍存錢挑戰</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+
+        :root {
+            --macaron-pink: #FFB7B2;
+            --macaron-yellow: #FFDAC1;
+            --macaron-green: #E2F0CB;
+            --macaron-blue: #B5EAD7;
+            --macaron-purple: #C7CEEA;
+            --bg-gradient: linear-gradient(120deg, #E0C3FC 0%, #8EC5FC 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-color: #4a4a4a; 
+            --shadow-soft: 0 10px 25px rgba(162, 162, 255, 0.2);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            margin: 0; padding: 15px;
+            display: flex; justify-content: center; min-height: 100vh;
+        }
+
+        .container {
+            width: 100%; max-width: 900px;
+            background: var(--card-bg);
+            border-radius: 25px; padding: 25px;
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: blur(10px);
+            border: 3px solid #fff;
+        }
+
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { color: #845EC2; font-size: 1.8rem; margin: 0; text-shadow: 2px 2px 0px #fff; }
+
+        /* 使用者切換按鈕 */
+        .user-switcher {
+            display: flex; justify-content: center;
+            gap: 10px; margin: 20px 0;
+        }
+        .user-btn {
+            padding: 10px 25px; border-radius: 50px;
+            border: 2px solid #845EC2; background: white;
+            color: #845EC2; font-weight: 800; cursor: pointer;
+            transition: 0.3s;
+        }
+        .user-btn.active { background: #845EC2; color: white; }
+        
+        .sync-status { font-size: 0.75rem; color: #888; margin-top: 5px; }
+
+        /* Dashboard 統計區 */
+        .dashboard { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .stat-box {
+            flex: 1 1 calc(33.33% - 10px);
+            text-align: center; padding: 15px; border-radius: 20px;
+            min-height: 100px; display: flex; flex-direction: column; justify-content: center;
+        }
+        @media (max-width: 600px) { .stat-box { flex: 1 1 100%; } }
+
+        .stat-box:nth-child(1) { background-color: var(--macaron-blue); }
+        .stat-box:nth-child(2) { background-color: var(--macaron-yellow); }
+        .stat-box:nth-child(3) { background-color: var(--macaron-pink); }
+
+        .stat-label { font-size: 0.8rem; font-weight: 700; margin-bottom: 5px; }
+        .stat-value { font-size: 1.5rem; font-weight: 800; }
+
+        .progress-container {
+            width: 100%; background: #f0f0f0; border-radius: 50px;
+            height: 15px; margin: 20px 0; overflow: hidden; padding: 2px;
+        }
+        .progress-bar {
+            height: 100%; width: 0%; border-radius: 50px;
+            background: linear-gradient(90deg, var(--macaron-pink), var(--macaron-blue));
+            transition: width 0.5s ease;
+        }
+
+        /* 網格系統 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            gap: 8px; margin-top: 20px;
+        }
+        .day-box {
+            aspect-ratio: 1; border-radius: 50%; border: 2px solid #ddd;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; cursor: pointer; transition: 0.2s;
+            background: #fff; font-size: 0.85rem;
+        }
+        .day-box.active { color: #fff; border-color: transparent; }
+        .day-box.active:nth-child(5n+1) { background-color: var(--macaron-pink); }
+        .day-box.active:nth-child(5n+2) { background-color: var(--macaron-yellow); }
+        .day-box.active:nth-child(5n+3) { background-color: var(--macaron-green); }
+        .day-box.active:nth-child(5n+4) { background-color: var(--macaron-blue); }
+        .day-box.active:nth-child(5n+5) { background-color: var(--macaron-purple); }
+
+        .controls { text-align: center; margin-top: 30px; }
+        .btn-reset {
+            background: none; border: 2px solid #FF9AA2; color: #FF9AA2;
+            padding: 10px 30px; border-radius: 50px; font-weight: 700; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1 id="title">🍭 我的馬卡龍存錢</h1>
+        <div class="user-switcher">
+            <button class="user-btn active" id="btnA" onclick="switchUser('A')">我的進度</button>
+            <button class="user-btn" id="btnB" onclick="switchUser('B')">另一半進度</button>
+        </div>
+        <div class="sync-status" id="sync-info">☁️ 雲端同步中...</div>
+    </header>
+
+    <div class="dashboard">
+        <div class="stat-box">
+            <div class="stat-label">🧁 累積金額</div>
+            <div class="stat-value" id="current-total">$0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">📅 完成天數</div>
+            <div class="stat-value"><span id="days-completed">0</span>/365</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">🌈 達成率</div>
+            <div class="stat-value" id="percent-complete">0%</div>
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div class="grid" id="grid-container"></div>
+
+    <div class="controls">
+        <button class="btn-reset" onclick="resetData()">🍬 重置目前頁面</button>
+    </div>
+</div>
+
+<script>
+    // ----------------------------------------------------
+    // 請在這裡填入你的 Google Apps Script 部署網址
+    // ----------------------------------------------------
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxact7LMnkFfpvs6S9KUjmo1oZ9QcoI6QK4XcHORd4CTperkdmJi_aLQe9qDCnDnIw/exec';
+
+    let currentUser = 'A'; 
+    let savedData = [];
+    const totalDays = 365;
+    const grandTotal = (totalDays * (totalDays + 1)) / 2;
+
+    async function init() {
+        // 1. 初始化 UI
+        updateUserUI();
+        // 2. 優先讀取本地快取（秒開體驗）
+        savedData = JSON.parse(localStorage.getItem(`money_2026_${currentUser}`)) || [];
+        renderGrid();
+        updateStats();
+        // 3. 從雲端抓取最新資料
+        await fetchCloud();
+    }
+
+    function updateUserUI() {
+        document.getElementById('btnA').classList.toggle('active', currentUser === 'A');
+        document.getElementById('btnB').classList.toggle('active', currentUser === 'B');
+        document.getElementById('title').textContent = `🍭 ${currentUser === 'A' ? '我' : '另一半'}的馬卡龍存錢`;
+    }
+
+    async function switchUser(user) {
+        if (currentUser === user) return;
+        currentUser = user;
+        updateUserUI();
+        // 先顯示本地
+        savedData = JSON.parse(localStorage.getItem(`money_2026_${currentUser}`)) || [];
+        renderGrid();
+        updateStats();
+        // 再同步雲端
+        await fetchCloud();
+    }
+
+    async function fetchCloud() {
+        document.getElementById('sync-info').textContent = "☁️ 正在與雲端對齊...";
+        try {
+            const res = await fetch(`${GOOGLE_SCRIPT_URL}?user=${currentUser}`);
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                savedData = data;
+                localStorage.setItem(`money_2026_${currentUser}`, JSON.stringify(savedData));
+                renderGrid();
+                updateStats();
+                document.getElementById('sync-info').textContent = "✅ 雲端已同步 " + new Date().toLocaleTimeString();
+            }
+        } catch (e) {
+            document.getElementById('sync-info').textContent = "⚠️ 離線模式 (無法連接雲端)";
+        }
+    }
+
+    async function saveData() {
+        localStorage.setItem(`money_2026_${currentUser}`, JSON.stringify(savedData));
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // 解決跨域
+                body: JSON.stringify({ user: currentUser, savedData: savedData })
+            });
+            document.getElementById('sync-info').textContent = "✅ 已自動儲存雲端";
+        } catch (e) {
+            document.getElementById('sync-info').textContent = "❌ 雲端存檔失敗";
+        }
+    }
+
+    function renderGrid() {
+        const container = document.getElementById('grid-container');
+        container.innerHTML = '';
+        for (let i = 1; i <= totalDays; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'day-box' + (savedData.includes(i) ? ' active' : '');
+            cell.textContent = i;
+            cell.onclick = () => toggleDay(i, cell);
+            container.appendChild(cell);
+        }
+    }
+
+    function toggleDay(day, el) {
+        if (savedData.includes(day)) {
+            savedData = savedData.filter(d => d !== day);
+            el.classList.remove('active');
+        } else {
+            savedData.push(day);
+            el.classList.add('active');
+        }
+        updateStats();
+        saveData(); // 每次點擊都會存檔
+    }
+
+    function updateStats() {
+        const sum = savedData.reduce((a, b) => a + b, 0);
+        const count = savedData.length;
+        const percent = ((sum / grandTotal) * 100).toFixed(1);
+
+        document.getElementById('current-total').textContent = `$${sum.toLocaleString()}`;
+        document.getElementById('days-completed').textContent = count;
+        document.getElementById('percent-complete').textContent = `${percent}%`;
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+    }
+
+    async function resetData() {
+        if (confirm(`確定要清空「${currentUser === 'A' ? '我' : '另一半'}」的紀錄嗎？`)) {
+            savedData = [];
+            renderGrid();
+            updateStats();
+            await saveData();
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>
