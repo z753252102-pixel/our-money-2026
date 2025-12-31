@@ -41,7 +41,6 @@
         header { text-align: center; margin-bottom: 20px; }
         h1 { color: #845EC2; font-size: 1.8rem; margin: 0; text-shadow: 2px 2px 0px #fff; }
 
-        /* 使用者切換按鈕 */
         .user-switcher {
             display: flex; justify-content: center;
             gap: 10px; margin: 20px 0;
@@ -54,14 +53,14 @@
         }
         .user-btn.active { background: #845EC2; color: white; }
         
-        .sync-status { font-size: 0.75rem; color: #888; margin-top: 5px; }
+        .sync-status { font-size: 0.8rem; color: #666; margin-top: 8px; font-weight: bold; }
 
-        /* Dashboard 統計區 */
-        .dashboard { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .dashboard { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
         .stat-box {
             flex: 1 1 calc(33.33% - 10px);
             text-align: center; padding: 15px; border-radius: 20px;
             min-height: 100px; display: flex; flex-direction: column; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         @media (max-width: 600px) { .stat-box { flex: 1 1 100%; } }
 
@@ -69,55 +68,57 @@
         .stat-box:nth-child(2) { background-color: var(--macaron-yellow); }
         .stat-box:nth-child(3) { background-color: var(--macaron-pink); }
 
-        .stat-label { font-size: 0.8rem; font-weight: 700; margin-bottom: 5px; }
-        .stat-value { font-size: 1.5rem; font-weight: 800; }
+        .stat-label { font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; opacity: 0.8; }
+        .stat-value { font-size: 1.6rem; font-weight: 800; }
 
         .progress-container {
-            width: 100%; background: #f0f0f0; border-radius: 50px;
-            height: 15px; margin: 20px 0; overflow: hidden; padding: 2px;
+            width: 100%; background: #eee; border-radius: 50px;
+            height: 18px; margin: 20px 0; overflow: hidden; padding: 3px;
+            border: 1px solid #ddd;
         }
         .progress-bar {
             height: 100%; width: 0%; border-radius: 50px;
-            background: linear-gradient(90deg, var(--macaron-pink), var(--macaron-blue));
-            transition: width 0.5s ease;
+            background: linear-gradient(90deg, var(--macaron-pink), var(--macaron-purple));
+            transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* 網格系統 */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
-            gap: 8px; margin-top: 20px;
+            gap: 10px; margin-top: 20px;
         }
         .day-box {
-            aspect-ratio: 1; border-radius: 50%; border: 2px solid #ddd;
+            aspect-ratio: 1; border-radius: 50%; border: 2px solid #eee;
             display: flex; align-items: center; justify-content: center;
             font-weight: 800; cursor: pointer; transition: 0.2s;
-            background: #fff; font-size: 0.85rem;
+            background: #fff; font-size: 0.85rem; color: #888;
         }
-        .day-box.active { color: #fff; border-color: transparent; }
+        .day-box.active { color: #fff; border-color: transparent; transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .day-box.active:nth-child(5n+1) { background-color: var(--macaron-pink); }
         .day-box.active:nth-child(5n+2) { background-color: var(--macaron-yellow); }
         .day-box.active:nth-child(5n+3) { background-color: var(--macaron-green); }
         .day-box.active:nth-child(5n+4) { background-color: var(--macaron-blue); }
         .day-box.active:nth-child(5n+5) { background-color: var(--macaron-purple); }
 
-        .controls { text-align: center; margin-top: 30px; }
+        .controls { text-align: center; margin-top: 40px; padding-bottom: 20px; }
         .btn-reset {
-            background: none; border: 2px solid #FF9AA2; color: #FF9AA2;
+            background: #fff; border: 2px solid #FF9AA2; color: #FF9AA2;
             padding: 10px 30px; border-radius: 50px; font-weight: 700; cursor: pointer;
+            transition: 0.3s;
         }
+        .btn-reset:hover { background: #FF9AA2; color: #fff; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1 id="title">🍭 我的馬卡龍存錢</h1>
+        <h1 id="title">🍭 載入中...</h1>
         <div class="user-switcher">
             <button class="user-btn active" id="btnA" onclick="switchUser('A')">我的進度</button>
             <button class="user-btn" id="btnB" onclick="switchUser('B')">另一半進度</button>
         </div>
-        <div class="sync-status" id="sync-info">☁️ 雲端同步中...</div>
+        <div class="sync-status" id="sync-info">⏳ 正在與雲端同步...</div>
     </header>
 
     <div class="dashboard">
@@ -127,7 +128,7 @@
         </div>
         <div class="stat-box">
             <div class="stat-label">📅 完成天數</div>
-            <div class="stat-value"><span id="days-completed">0</span>/365</div>
+            <div class="stat-value"><span id="days-completed">0</span> / 365</div>
         </div>
         <div class="stat-box">
             <div class="stat-label">🌈 達成率</div>
@@ -148,7 +149,7 @@
 
 <script>
     // ----------------------------------------------------
-    // 請在這裡填入你的 Google Apps Script 部署網址
+    // 【重要】請在此處填入你的 Google Apps Script URL
     // ----------------------------------------------------
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxact7LMnkFfpvs6S9KUjmo1oZ9QcoI6QK4XcHORd4CTperkdmJi_aLQe9qDCnDnIw/exec';
 
@@ -158,13 +159,21 @@
     const grandTotal = (totalDays * (totalDays + 1)) / 2;
 
     async function init() {
-        // 1. 初始化 UI
+        // 先檢查網址有沒有指定使用者 (?user=B)
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('user') === 'B') currentUser = 'B';
+        
         updateUserUI();
-        // 2. 優先讀取本地快取（秒開體驗）
-        savedData = JSON.parse(localStorage.getItem(`money_2026_${currentUser}`)) || [];
-        renderGrid();
-        updateStats();
-        // 3. 從雲端抓取最新資料
+        
+        // 1. 優先從本地讀取（讓使用者感覺秒開）
+        const localCache = localStorage.getItem(`money_2026_${currentUser}`);
+        if (localCache) {
+            savedData = JSON.parse(localCache);
+            renderGrid();
+            updateStats();
+        }
+        
+        // 2. 向雲端請求最新資料
         await fetchCloud();
     }
 
@@ -178,42 +187,52 @@
         if (currentUser === user) return;
         currentUser = user;
         updateUserUI();
-        // 先顯示本地
-        savedData = JSON.parse(localStorage.getItem(`money_2026_${currentUser}`)) || [];
+        
+        // 切換時清空並重新讀取該使用者的資料
+        const localCache = localStorage.getItem(`money_2026_${currentUser}`);
+        savedData = localCache ? JSON.parse(localCache) : [];
+        
         renderGrid();
         updateStats();
-        // 再同步雲端
         await fetchCloud();
     }
 
     async function fetchCloud() {
-        document.getElementById('sync-info').textContent = "☁️ 正在與雲端對齊...";
+        document.getElementById('sync-info').textContent = "⏳ 正在同步雲端...";
         try {
-            const res = await fetch(`${GOOGLE_SCRIPT_URL}?user=${currentUser}`);
-            const data = await res.json();
-            if (Array.isArray(data)) {
-                savedData = data;
+            // 在網址後加上 user 參數傳給後端 doGet
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?user=${currentUser}`);
+            const cloudData = await response.json();
+            
+            if (Array.isArray(cloudData)) {
+                savedData = cloudData;
                 localStorage.setItem(`money_2026_${currentUser}`, JSON.stringify(savedData));
                 renderGrid();
                 updateStats();
                 document.getElementById('sync-info').textContent = "✅ 雲端已同步 " + new Date().toLocaleTimeString();
             }
         } catch (e) {
-            document.getElementById('sync-info').textContent = "⚠️ 離線模式 (無法連接雲端)";
+            console.error(e);
+            document.getElementById('sync-info').textContent = "⚠️ 離線狀態 (顯示本地資料)";
         }
     }
 
     async function saveData() {
+        // 先存本地
         localStorage.setItem(`money_2026_${currentUser}`, JSON.stringify(savedData));
+        
+        // 後傳雲端
         try {
+            document.getElementById('sync-info').textContent = "☁️ 雲端儲存中...";
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // 解決跨域
+                mode: 'no-cors', // 關鍵：解決 Google Apps Script 的 CORS 問題
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user: currentUser, savedData: savedData })
             });
-            document.getElementById('sync-info').textContent = "✅ 已自動儲存雲端";
+            document.getElementById('sync-info').textContent = "✅ 雲端已儲存";
         } catch (e) {
-            document.getElementById('sync-info').textContent = "❌ 雲端存檔失敗";
+            document.getElementById('sync-info').textContent = "❌ 雲端儲存失敗";
         }
     }
 
@@ -238,7 +257,7 @@
             el.classList.add('active');
         }
         updateStats();
-        saveData(); // 每次點擊都會存檔
+        saveData(); // 每次點擊自動儲存
     }
 
     function updateStats() {
@@ -253,7 +272,8 @@
     }
 
     async function resetData() {
-        if (confirm(`確定要清空「${currentUser === 'A' ? '我' : '另一半'}」的紀錄嗎？`)) {
+        const userName = currentUser === 'A' ? '我' : '另一半';
+        if (confirm(`確定要清空「${userName}」的進度嗎？此動作無法復原！`)) {
             savedData = [];
             renderGrid();
             updateStats();
